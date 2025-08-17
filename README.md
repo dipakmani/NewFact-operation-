@@ -1,96 +1,124 @@
 import pandas as pd
-import random
 import numpy as np
+from faker import Faker
+import random
+
+fake = Faker()
 
 # Number of records
-num_records = 500000
+n = 500000  
 
-# -------------------------
-# Helper functions
-# -------------------------
-def random_date():
-    return pd.to_datetime("2020-01-01") + pd.to_timedelta(random.randint(0, 1825), unit="D")
+# Generate IDs
+operation_ids = [f"OP{100000+i}" for i in range(n)]
+patient_ids = [f"P{random.randint(1000,9999)}" for _ in range(n)]
+doctor_ids = [f"D{random.randint(100,999)}" for _ in range(n)]
+procedure_ids = [f"PR{random.randint(100,999)}" for _ in range(n)]
+anesthesia_ids = [f"A{random.randint(10,99)}" for _ in range(n)]
+equipment_ids = [f"E{random.randint(200,400)}" for _ in range(n)]
+nurse_ids = [f"N{random.randint(50,200)}" for _ in range(n)]
+room_ids = [f"R{random.randint(1,50)}" for _ in range(n)]
+bloodtransfusion_ids = [f"BT{random.randint(1,1000)}" for _ in range(n)]
+billing_ids = [f"B{random.randint(10000,99999)}" for _ in range(n)]
+recovery_ids = [f"RC{random.randint(1,500)}" for _ in range(n)]
+followup_ids = [f"FU{random.randint(1,1000)}" for _ in range(n)]
 
-def random_choice(options):
-    return random.choice(options)
+# Procedure attributes
+procedure_types = ["Bypass Surgery", "Appendectomy", "Hip Replacement", "Angioplasty", "Cataract Surgery"]
+procedure_categories = ["Cardiac", "General Surgery", "Orthopedic", "Neuro", "Ophthalmology"]
+procedure_cpt_codes = [f"CPT{random.randint(1000,9999)}" for _ in range(n)]
 
-# -------------------------
-# Generate Fact_Operations Dataset
-# -------------------------
+# Anesthesia attributes
+anesthesia_types = ["General", "Local", "Regional", "Sedation"]
+anesthesia_durations = np.random.randint(30, 240, n)  # minutes
+anesthetist_names = [fake.name() for _ in range(n)]
+
+# Equipment attributes
+equipment_names = ["Scalpel", "ECG Monitor", "Defibrillator", "Endoscope", "Ventilator"]
+equipment_types = ["Surgical", "Monitoring", "Support", "Diagnostic"]
+equipment_manufacturers = ["Medtronic", "GE Healthcare", "Siemens", "Philips", "Johnson & Johnson"]
+equipment_models = [f"Model-{random.randint(100,999)}" for _ in range(n)]
+
+# Nurse attributes
+nurse_names = [fake.name() for _ in range(n)]
+nurse_shifts = ["Morning", "Evening", "Night"]
+nurse_experience = np.random.randint(1, 30, n)
+nurse_education = ["B.Sc Nursing", "GNM", "M.Sc Nursing"]
+
+# Room attributes
+room_types = ["ICU", "General", "Operation Theater"]
+
+# Blood Transfusion attributes
+blood_types = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+transfusion_complications = ["Y", "N"]
+
+# Billing attributes
+payment_methods = ["Cash", "Credit Card", "Insurance", "Online Transfer"]
+
+# Recovery attributes
+recovery_room_types = ["ICU", "Step-Down Unit", "General Ward"]
+recovery_complications = ["Y", "N"]
+physiotherapy_required = ["Y", "N"]
+
+# FollowUp attributes
+followup_types = ["Physical", "Virtual"]
+
+# Build dataset
 data = {
-    # Operation IDs
-    "OperationID": range(1, num_records + 1),
-
-    # ProcedureID & Attributes
-    "ProcedureID": np.random.randint(1000, 2000, num_records),
-    "Procedure_Type": np.random.choice(["Surgery", "Biopsy", "Transplant", "Endoscopy"], num_records),
-    "Procedure_Category": np.random.choice(["Cardiac", "Neuro", "Ortho", "General"], num_records),
-    "Procedure_CPT_Code": np.random.randint(10000, 99999, num_records),
-
-    # AnesthesiaID & Attributes
-    "AnesthesiaID": np.random.randint(2000, 3000, num_records),
-    "Anesthesia_Type": np.random.choice(["General", "Local", "Regional", "Sedation"], num_records),
-    "Anesthesia_Dosage": np.random.randint(50, 300, num_records),
-    "Anesthesia_Complications": np.random.choice(["Y", "N"], num_records),
-
-    # EquipmentID & Attributes
-    "EquipmentID": np.random.randint(3000, 4000, num_records),
-    "Equipment_Name": np.random.choice(["Scalpel", "Monitor", "Ventilator", "ECG", "X-Ray Machine"], num_records),
-    "Equipment_Type": np.random.choice(["Surgical", "Diagnostic", "Support"], num_records),
-    "Equipment_Manufacturer": np.random.choice(["GE", "Philips", "Siemens", "Medtronic"], num_records),
-    "Equipment_Model": np.random.choice(["X100", "M200", "S300", "V400"], num_records),
-
-    # NurseID & Attributes
-    "NurseID": np.random.randint(4000, 5000, num_records),
-    "Nurse_FullName": np.random.choice(["Alice Brown", "John Smith", "Mary Johnson", "Robert Wilson"], num_records),
-    "Nurse_Shift": np.random.choice(["Day", "Night"], num_records),
-    "Nurse_ExperienceYears": np.random.randint(1, 30, num_records),
-    "Nurse_Education": np.random.choice(["BSc Nursing", "MSc Nursing", "Diploma"], num_records),
-
-    # RoomID & Attributes
-    "RoomID": np.random.randint(5000, 6000, num_records),
-    "Room_Type": np.random.choice(["ICU", "General", "Operation Theater"], num_records),
-
-    # BloodTransfusionID & Attributes
-    "BloodTransfusionID": np.random.randint(6000, 7000, num_records),
-    "Blood_Type": np.random.choice(["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"], num_records),
-    "Units_Transfused": np.random.randint(1, 5, num_records),
-    "Donor_ID": np.random.randint(7000, 8000, num_records),
-    "Transfusion_Complications": np.random.choice(["Y", "N"], num_records),
-
-    # BillingID & Attributes
-    "BillingID": np.random.randint(8000, 9000, num_records),
-    "Total_Charges": np.random.randint(10000, 500000, num_records),
-    "Amount_Paid": np.random.randint(5000, 500000, num_records),
-    "Payment_Method": np.random.choice(["Cash", "Card", "Insurance"], num_records),
-    "Outstanding_Balance": np.random.randint(0, 20000, num_records),
-
-    # RecoveryID & Attributes
-    "RecoveryID": np.random.randint(9000, 10000, num_records),
-    "Recovery_Room_Type": np.random.choice(["ICU", "Ward", "Private"], num_records),
-    "Recovery_DurationHours": np.random.randint(1, 240, num_records),
-    "Recovery_Complications": np.random.choice(["Y", "N"], num_records),
-    "Physiotherapy_Required": np.random.choice(["Y", "N"], num_records),
-
-    # FollowUpID & Attributes
-    "FollowUpID": np.random.randint(10000, 11000, num_records),
-    "FollowUp_Date": [random_date() for _ in range(num_records)],
-    "FollowUp_Doctor": np.random.choice(["Dr. Adams", "Dr. Lee", "Dr. Patel", "Dr. Gomez"], num_records),
-    "FollowUp_Type": np.random.choice(["Physical", "Virtual"], num_records),
-    "Next_Appointment_Date": [random_date() for _ in range(num_records)],
-
-    # Measures
-    "Operation_DurationMinutes": np.random.randint(30, 600, num_records),
-    "Operation_Cost": np.random.randint(5000, 200000, num_records),
-    "Complications_Flag": np.random.choice(["Y", "N"], num_records),
-    "Success_Rate": np.random.randint(70, 100, num_records),
-    "Mortality_Flag": np.random.choice(["Y", "N"], num_records),
+    "OperationID": operation_ids,
+    "PatientID": patient_ids,
+    "DoctorID": doctor_ids,
+    "ProcedureID": procedure_ids,
+    "Procedure_Type": np.random.choice(procedure_types, n),
+    "Procedure_Category": np.random.choice(procedure_categories, n),
+    "Procedure_CPT_Code": procedure_cpt_codes,
+    "AnesthesiaID": anesthesia_ids,
+    "Anesthesia_Type": np.random.choice(anesthesia_types, n),
+    "Anesthesia_DurationMinutes": anesthesia_durations,
+    "Anesthetist_Name": anesthetist_names,
+    "EquipmentID": equipment_ids,
+    "Equipment_Name": np.random.choice(equipment_names, n),
+    "Equipment_Type": np.random.choice(equipment_types, n),
+    "Equipment_Manufacturer": np.random.choice(equipment_manufacturers, n),
+    "Equipment_Model": equipment_models,
+    "NurseID": nurse_ids,
+    "Nurse_FullName": nurse_names,
+    "Nurse_Shift": np.random.choice(nurse_shifts, n),
+    "Nurse_ExperienceYears": nurse_experience,
+    "Nurse_Education": np.random.choice(nurse_education, n),
+    "RoomID": room_ids,
+    "Room_Type": np.random.choice(room_types, n),
+    "BloodTransfusionID": bloodtransfusion_ids,
+    "Blood_Type": np.random.choice(blood_types, n),
+    "Units_Transfused": np.random.randint(1, 5, n),
+    "Donor_ID": [f"DNR{random.randint(1000,9999)}" for _ in range(n)],
+    "Transfusion_Complications": np.random.choice(transfusion_complications, n),
+    "BillingID": billing_ids,
+    "Total_Charges": np.random.randint(5000, 200000, n),
+    "Amount_Paid": np.random.randint(3000, 200000, n),
+    "Payment_Method": np.random.choice(payment_methods, n),
+    "Outstanding_Balance": np.random.randint(0, 50000, n),
+    "RecoveryID": recovery_ids,
+    "Recovery_Room_Type": np.random.choice(recovery_room_types, n),
+    "Recovery_DurationHours": np.random.randint(1, 48, n),
+    "Recovery_Complications": np.random.choice(recovery_complications, n),
+    "Physiotherapy_Required": np.random.choice(physiotherapy_required, n),
+    "FollowUpID": followup_ids,
+    "FollowUp_Date": [fake.date_between(start_date="-1y", end_date="today") for _ in range(n)],
+    "FollowUp_Doctor": [fake.name() for _ in range(n)],
+    "FollowUp_Type": np.random.choice(followup_types, n),
+    "Next_Appointment_Date": [fake.date_between(start_date="today", end_date="+6m") for _ in range(n)],
+    # Fact Measures
+    "Operation_DurationMinutes": np.random.randint(30, 600, n),
+    "Operation_Cost": np.random.randint(10000, 500000, n),
+    "Complications_Flag": np.random.choice(["Y", "N"], n),
+    "Success_Rate(%)": np.random.randint(70, 100, n),
+    "Mortality_Flag": np.random.choice(["Y", "N"], n),
 }
 
-# Convert to DataFrame
+# Create DataFrame
 df = pd.DataFrame(data)
 
 # Save to CSV
 df.to_csv("Fact_Operations.csv", index=False)
 
-print("✅ Fact_Operations.csv generated successfully with", num_records, "records")
+print("✅ Fact_Operations dataset with 5 lakh records generated successfully!")
